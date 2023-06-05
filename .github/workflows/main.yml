@@ -1,0 +1,13 @@
+name: run linter
+on: push
+jobs:
+  run_linter:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: install poetry
+      run: pip install poetry
+    - name: install dependencies
+      run: poetry install
+    - name: run linter
+      run: poetry run flake8 page_analyzer
