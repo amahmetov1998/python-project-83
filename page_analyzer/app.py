@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+import psycopq2
 
 app = Flask(__name__)
 
