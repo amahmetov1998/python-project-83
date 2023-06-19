@@ -58,7 +58,8 @@ def add_url():
         with connect.cursor() as curs:
             curs.execute('''
             SELECT * FROM urls;
-            ''')
+            '''
+                         )
             data = curs.fetchall()
 
     except Exception as err:
