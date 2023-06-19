@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, flash, get_flashed_messages
+from flask import Flask, render_template, \
+    request, redirect, flash, get_flashed_messages
 import psycopg2
 from page_analyzer.config import DATABASE_URL, SECRET_KEY
 from page_analyzer.validator import validate
