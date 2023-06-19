@@ -1,0 +1,2 @@
+EMPTY = 'empty'
+INVALID = 'invalid'
