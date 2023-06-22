@@ -38,32 +38,34 @@
                     
         <main class="flex-grow-1">
             <div class="container-lg mt-3">
-                <h1>Сайт: {{data[0][1]}}</h1>
+                {% for elem in data %}
+                <h1>Сайт: {{elem[1]}}</h1>
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover text-nowrap" data-test="url">
                         <tbody>
                             <tr>
                                 <td>ID</td>
-                                <td>{{ data[0][0] }}</td>
+                                <td>{{ elem[0] }}</td>
                             </tr>
                             <tr>
                                 <td>Имя</td>
-                                <td>{{ data[0][1] }}</td>
+                                <td>{{ elem[1] }}</td>
                             </tr>
                             <tr>
                                 <td>Дата создания</td>
-                                <td>{{ data[0][2] }}</td>
+                                <td>{{ elem[2] }}</td>
                             </tr>
                         </tbody>
                     </table>
+                    {% endfor %}
                 </div>
                 
                 <h2 class="mt-5 mb-3">Проверки</h2>
-                <form action="#" method="post"> 
+                <form action="/urls/{{ data[0][0] }}/checks" method="post"> 
                     <input type="submit" class="btn btn-primary" value="Запустить проверку">
                 </form>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover mt-2" data-test="checks">
+                    <table class="table table-bordered table-hover mt-2" data-test="checks url">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -75,6 +77,18 @@
                             </tr>
                         </thead>
                         <tbody>
+                        {% if info %}
+                        {% for elem in info %}
+                            <tr>
+                                <td>{{ elem[0] }}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>{{ elem[6] }}</td>
+                            </tr>
+                        {% endfor %}
+                        {% endif %}
                         </tbody>
                     </table>
                 </div>
