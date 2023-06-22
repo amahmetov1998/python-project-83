@@ -153,19 +153,25 @@ def get_urls():
         connect = psycopg2.connect(DATABASE_URL)
         with connect.cursor() as curs:
             curs.execute('''
+            SELECT id, name
+            FROM urls
+            WHERE NOT EXISTS (SELECT urls.id FROM url_checks WHERE urls.id = url_checks.url_id);''')
+            not_added = curs.fetchall()
+        with connect.cursor() as curs:
+            curs.execute('''
             SELECT url_checks.url_id, urls.name, MAX(url_checks.created_at)
             FROM url_checks
             JOIN urls
             ON urls.id = url_checks.url_id
             GROUP BY url_checks.url_id, urls.name
-            ORDER BY url_checks.url_id DESC
+            ORDER BY url_checks.url_id DESC;
             ''')
-            data = curs.fetchall()
-
+            added = curs.fetchall()
+        data = added + not_added
     except Exception as err:
         return err
 
-    return render_template('urls.html', data=data)
+    return render_template('urls.html', data=sorted(data, key=lambda x: x[0], reverse=True))
 
 
 @app.route('/urls/<int:url_id>/checks', methods=['POST'])
