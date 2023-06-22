@@ -112,7 +112,7 @@ def add_url():
             ''', (url, date.today()))
 
             curs.execute('''
-            SELECT id FROM urls WHERE name=%s;
+            SELECT id FROM urls WHERE name=%s
             ''', (url,))
             url_id = curs.fetchone()[0]
 
