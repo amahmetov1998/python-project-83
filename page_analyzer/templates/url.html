@@ -27,10 +27,16 @@
                 {% for category, message in messages %}
                     {% if category == 'warning' %}
                     <div class="alert alert-info" role="alert">
-                    {% elif category == 'success' %}
+                    {% elif category == 'success_add' %}
                     <div class="alert alert-success" role="alert">
+                    {% elif category == 'success_check' %}
+                    <div class="alert alert-success" role="alert">
+                    {% elif category == 'error' %}
+                    <div class="alert alert-danger" role="alert">
                     {% endif %} 
                         {{ message }}
+                    </div>
+                    </div>
                     </div>
                     </div>
                 {% endfor %}
@@ -81,7 +87,7 @@
                         {% for elem in info %}
                             <tr>
                                 <td>{{ elem[0] }}</td>
-                                <td></td>
+                                <td>{{ elem[2] }}</td>
                                 <td></td>
                                 <td></td>
                                 <td></td>

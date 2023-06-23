@@ -1,11 +1,12 @@
 from flask import Flask, render_template, \
     request, redirect, flash, get_flashed_messages
 import psycopg2
+import requests
 from page_analyzer.config import DATABASE_URL, SECRET_KEY
 from page_analyzer.validator import validate
 from page_analyzer.parser import parse
 from datetime import date
-from page_analyzer.constants import INVALID, EMPTY
+from page_analyzer.constants import INVALID, EMPTY, TOO_LONG
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -51,6 +52,7 @@ def main_2():
             curs.execute(
                 '''DROP TABLE IF EXISTS urls''')
         return 'True'
+
     except Exception as err:
         return err
 
@@ -72,6 +74,11 @@ def add_url():
 
     elif errors['url'] == INVALID:
         flash('Некорректный URL', 'error')
+        messages = get_flashed_messages(with_categories=True)
+        return render_template('main.html', url=url, messages=messages)
+
+    elif errors['url'] == TOO_LONG:
+        flash('URL превышает 255 символов', 'error')
         messages = get_flashed_messages(with_categories=True)
         return render_template('main.html', url=url, messages=messages)
 
@@ -119,8 +126,7 @@ def add_url():
     except Exception as err:
         return err
 
-    flash('Страница успешно добавлена', 'success')
-
+    flash('Страница успешно добавлена', 'success_add')
     return redirect(f'/urls/{url_id}')
 
 
@@ -159,15 +165,16 @@ def get_urls():
             not_added = curs.fetchall()
         with connect.cursor() as curs:
             curs.execute('''
-            SELECT url_checks.url_id, urls.name, MAX(url_checks.created_at)
+            SELECT url_checks.url_id, urls.name, MAX(url_checks.created_at), url_checks.status_code
             FROM url_checks
             JOIN urls
             ON urls.id = url_checks.url_id
-            GROUP BY url_checks.url_id, urls.name
+            GROUP BY url_checks.url_id, urls.name, url_checks.status_code
             ORDER BY url_checks.url_id DESC;
             ''')
             added = curs.fetchall()
         data = added + not_added
+
     except Exception as err:
         return err
 
@@ -176,16 +183,31 @@ def get_urls():
 
 @app.route('/urls/<int:url_id>/checks', methods=['POST'])
 def check_urls(url_id):
+
     try:
         connect = psycopg2.connect(DATABASE_URL)
         connect.autocommit = True
         with connect.cursor() as curs:
             curs.execute('''
-            INSERT INTO url_checks (url_id, created_at)
-            VALUES (%s, %s)
-            ''', (url_id, date.today(),))
+            SELECT name FROM urls WHERE id = %s
+            ''', (url_id,))
+            name = curs.fetchall()[0][0]
 
     except Exception as err:
         return err
-    flash('Страница успешно проверена', 'success')
-    return redirect(f'/urls/{url_id}')
+
+    try:
+        status = requests.get(name).status_code
+        connect = psycopg2.connect(DATABASE_URL)
+        connect.autocommit = True
+        with connect.cursor() as curs:
+            curs.execute('''
+            INSERT INTO url_checks (url_id, status_code, created_at)
+            VALUES (%s, %s, %s)
+            ''', (url_id, status, date.today(),))
+        flash('Страница успешно проверена', 'success_check')
+        return redirect(f'/urls/{url_id}')
+
+    except ConnectionError:
+        flash('Произошла ошибка при проверке', 'error')
+        return redirect(f'/urls/{url_id}')
