@@ -1,5 +1,5 @@
 from flask import Flask, render_template, \
-    request, redirect, flash, get_flashed_messages
+    request, redirect, flash, get_flashed_messages, url_for
 import psycopg2
 import requests
 from page_analyzer.config import DATABASE_URL, SECRET_KEY
@@ -7,6 +7,7 @@ from page_analyzer.validator import validate
 from page_analyzer.parser import parse
 from datetime import date
 from page_analyzer.constants import INVALID, EMPTY, TOO_LONG
+from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -39,22 +40,6 @@ def main():
     url = {'url': ''}
 
     return render_template('main.html', url=url)
-
-
-@app.route('/drop')
-def main_2():
-    try:
-        connect = psycopg2.connect(DATABASE_URL)
-        connect.autocommit = True
-        with connect.cursor() as curs:
-            curs.execute(
-                '''DROP TABLE IF EXISTS url_checks''')
-            curs.execute(
-                '''DROP TABLE IF EXISTS urls''')
-        return 'True'
-
-    except Exception as err:
-        return err
 
 
 @app.route('/urls', methods=['POST'])
@@ -106,7 +91,7 @@ def add_url():
                 return err
 
             flash('Страница уже существует', 'warning')
-            return redirect(f'/urls/{url_id}')
+            return redirect(url_for('get_url', url_id=url_id))
 
     try:
         connect = psycopg2.connect(DATABASE_URL)
@@ -127,7 +112,7 @@ def add_url():
         return err
 
     flash('Страница успешно добавлена', 'success_add')
-    return redirect(f'/urls/{url_id}')
+    return redirect(url_for('get_url', url_id=url_id))
 
 
 @app.get('/urls/<int:url_id>')
@@ -143,7 +128,7 @@ def get_url(url_id):
             data = curs.fetchall()
 
             curs.execute('''
-            SELECT * FROM url_checks WHERE url_id=%s
+            SELECT * FROM url_checks WHERE url_id=%s ORDER BY id DESC
             ''', (url_id,))
             info = curs.fetchall()
 
@@ -163,6 +148,7 @@ def get_urls():
             FROM urls
             WHERE NOT EXISTS (SELECT urls.id FROM url_checks WHERE urls.id = url_checks.url_id);''')
             not_added = curs.fetchall()
+
         with connect.cursor() as curs:
             curs.execute('''
             SELECT url_checks.url_id, urls.name, MAX(url_checks.created_at), url_checks.status_code
@@ -183,7 +169,6 @@ def get_urls():
 
 @app.route('/urls/<int:url_id>/checks', methods=['POST'])
 def check_urls(url_id):
-
     try:
         connect = psycopg2.connect(DATABASE_URL)
         connect.autocommit = True
@@ -197,17 +182,45 @@ def check_urls(url_id):
         return err
 
     try:
-        status = requests.get(name).status_code
         connect = psycopg2.connect(DATABASE_URL)
         connect.autocommit = True
+
+        status = requests.get(name).status_code
+        html = requests.get(name).text
+        soup = BeautifulSoup(html, 'lxml')
+
+        h1 = soup.h1
+        if not h1:
+            h1 = ''
+        else:
+            h1 = h1.string
+
+        title = soup.title
+        if not title:
+            title = ''
+        else:
+            title = title.string
+
+        tag = soup.find('meta', attrs={'name': 'description'})
+        if not tag:
+            description = ''
+        else:
+            description = tag['content']
+
         with connect.cursor() as curs:
             curs.execute('''
-            INSERT INTO url_checks (url_id, status_code, created_at)
-            VALUES (%s, %s, %s)
-            ''', (url_id, status, date.today(),))
+            INSERT INTO url_checks (url_id, h1, title, description, status_code, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            ''', (url_id, h1, title, description, status, date.today(),))
+
         flash('Страница успешно проверена', 'success_check')
-        return redirect(f'/urls/{url_id}')
+        return redirect(url_for('get_url', url_id=url_id))
 
     except ConnectionError:
         flash('Произошла ошибка при проверке', 'error')
-        return redirect(f'/urls/{url_id}')
+        return redirect(url_for('get_url', url_id=url_id))
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return render_template('errors.html', error=error)
