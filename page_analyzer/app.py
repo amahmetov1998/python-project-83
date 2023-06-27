@@ -13,20 +13,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
 
 
-@app.route('/drop')
-def main_2():
-    try:
-        connect = psycopg2.connect(DATABASE_URL)
-        connect.autocommit = True
-        with connect.cursor() as curs:
-            curs.execute('''DROP TABLE IF EXISTS url_checks''')
-            curs.execute('''DROP TABLE IF EXISTS urls''')
-            return 'True'
-
-    except Exception as err:
-        return err
-
-
 @app.route('/')
 def main():
     try:
