@@ -74,47 +74,56 @@ def add_url():
     if not errors:
         url = parse(url)
 
-        for elem in data:
-            if elem[1] == url:
-                try:
-                    with connect.cursor() as curs:
-                        curs.execute('''
-                        SELECT id FROM urls WHERE name=%s;
-                        ''', (url,))
-                        url_id = curs.fetchone()[0]
+    elif errors['url'] == EMPTY:
+        flash('Некорректный URL', 'error')
+        flash('URL обязателен', 'error')
 
-                except Exception as err:
-                    return err
+    elif errors['url'] == INVALID:
+        flash('Некорректный URL', 'error')
 
-                flash('Страница уже существует', 'warning')
-                return redirect(url_for('get_url', url_id=url_id))
-
-        try:
-            connect = psycopg2.connect(DATABASE_URL)
-            connect.autocommit = True
-            with connect.cursor() as curs:
-
-                curs.execute('''
-                INSERT INTO urls (name, created_at)
-                VALUES (%s, %s);
-                ''', (url, date.today()))
-
-                curs.execute('''
-                SELECT id FROM urls WHERE name=%s
-                ''', (url,))
-                url_id = curs.fetchone()[0]
-
-        except Exception as err:
-            return err
-
-        flash('Страница успешно добавлена', 'success_add')
-        return redirect(url_for('get_url', url_id=url_id))
-
+    elif errors['url'] == TOO_LONG:
+        flash('URL превышает 255 символов', 'error')
 
     messages = get_flashed_messages(with_categories=True)
 
     if messages:
         return render_template('main.html', url=url, messages=messages)
+
+    for elem in data:
+        if elem[1] == url:
+            try:
+                with connect.cursor() as curs:
+                    curs.execute('''
+                    SELECT id FROM urls WHERE name=%s;
+                    ''', (url,))
+                    url_id = curs.fetchone()[0]
+
+            except Exception as err:
+                return err
+
+            flash('Страница уже существует', 'warning')
+            return redirect(url_for('get_url', url_id=url_id))
+
+    try:
+        connect = psycopg2.connect(DATABASE_URL)
+        connect.autocommit = True
+        with connect.cursor() as curs:
+
+            curs.execute('''
+            INSERT INTO urls (name, created_at)
+            VALUES (%s, %s);
+            ''', (url, date.today()))
+
+            curs.execute('''
+            SELECT id FROM urls WHERE name=%s
+            ''', (url,))
+            url_id = curs.fetchone()[0]
+
+    except Exception as err:
+        return err
+
+    flash('Страница успешно добавлена', 'success_add')
+    return redirect(url_for('get_url', url_id=url_id))
 
 
 @app.get('/urls/<int:url_id>')
