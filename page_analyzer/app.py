@@ -13,12 +13,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
 
 
-def check():
-    url = request.form.to_dict()['entered_url']
-    errors = validate(url)
-    return errors, url
-
-
 @app.route('/drop')
 def main_2():
     try:
@@ -64,7 +58,7 @@ def main():
 
 @app.route('/urls', methods=['POST'])
 def add_url():
-    errors, url = check()
+
 
     if not errors:
         url = parse(url)
