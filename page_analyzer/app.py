@@ -58,20 +58,21 @@ def main():
 
 @app.route('/urls', methods=['POST'])
 def add_url():
+    url = request.form.to_dict()['entered_url']
+    errors = validate(url)
+    try:
+        connect = psycopg2.connect(DATABASE_URL)
+        with connect.cursor() as curs:
+            curs.execute('''
+            SELECT * FROM urls;
+            ''')
+            data = curs.fetchall()
 
+    except Exception as err:
+        return err
 
     if not errors:
         url = parse(url)
-        try:
-            connect = psycopg2.connect(DATABASE_URL)
-            with connect.cursor() as curs:
-                curs.execute('''
-                SELECT * FROM urls;
-                ''')
-                data = curs.fetchall()
-
-        except Exception as err:
-            return err
 
         for elem in data:
             if elem[1] == url:
@@ -109,15 +110,6 @@ def add_url():
         flash('Страница успешно добавлена', 'success_add')
         return redirect(url_for('get_url', url_id=url_id))
 
-    elif errors['url'] == EMPTY:
-        flash('Некорректный URL', 'error')
-        flash('URL обязателен', 'error')
-
-    elif errors['url'] == INVALID:
-        flash('Некорректный URL', 'error')
-
-    elif errors['url'] == TOO_LONG:
-        flash('URL превышает 255 символов', 'error')
 
     messages = get_flashed_messages(with_categories=True)
 
