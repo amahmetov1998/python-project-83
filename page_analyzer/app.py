@@ -74,15 +74,7 @@ def add_url():
     if not errors:
         url = parse(url)
 
-    elif errors['url'] == EMPTY:
-        flash('Некорректный URL', 'error')
-        flash('URL обязателен', 'error')
-
-    elif errors['url'] == INVALID:
-        flash('Некорректный URL', 'error')
-
-    elif errors['url'] == TOO_LONG:
-        flash('URL превышает 255 символов', 'error')
+ 
 
     messages = get_flashed_messages(with_categories=True)
 
