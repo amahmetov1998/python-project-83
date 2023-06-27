@@ -51,14 +51,14 @@ def main():
 
     except Exception as err:
         return err
-    url = {'url': ''}
+    data = {'entered_url': ''}
 
-    return render_template('main.html', url=url)
+    return render_template('main.html', data=data)
 
 
 @app.route('/urls', methods=['POST'])
 def add_url():
-    url = request.form.to_dict()['url']
+    url = request.form.to_dict()['entered_url']
     errors = validate(url)
 
     if not errors:
