@@ -54,17 +54,15 @@ def add_url():
     elif errors['url'] == EMPTY:
         flash('Некорректный URL', 'error')
         flash('URL обязателен', 'error')
-        messages = get_flashed_messages(with_categories=True)
-        return render_template('main.html', url=url, messages=messages)
 
     elif errors['url'] == INVALID:
         flash('Некорректный URL', 'error')
-        messages = get_flashed_messages(with_categories=True)
-        return render_template('main.html', url=url, messages=messages)
 
     elif errors['url'] == TOO_LONG:
         flash('URL превышает 255 символов', 'error')
-        messages = get_flashed_messages(with_categories=True)
+
+    messages = get_flashed_messages(with_categories=True)
+    if messages:
         return render_template('main.html', url=url, messages=messages)
 
     try:
@@ -146,12 +144,15 @@ def get_urls():
             curs.execute('''
             SELECT id, name
             FROM urls
-            WHERE NOT EXISTS (SELECT urls.id FROM url_checks WHERE urls.id = url_checks.url_id);''')
+            WHERE NOT EXISTS (SELECT urls.id
+                              FROM url_checks
+                              WHERE urls.id = url_checks.url_id);''')
             not_added = curs.fetchall()
 
         with connect.cursor() as curs:
             curs.execute('''
-            SELECT url_checks.url_id, urls.name, MAX(url_checks.created_at), url_checks.status_code
+            SELECT url_checks.url_id, urls.name,
+            MAX(url_checks.created_at), url_checks.status_code
             FROM url_checks
             JOIN urls
             ON urls.id = url_checks.url_id
@@ -164,7 +165,9 @@ def get_urls():
     except Exception as err:
         return err
 
-    return render_template('urls.html', data=sorted(data, key=lambda x: x[0], reverse=True))
+    return render_template(
+        'urls.html', data=sorted(data, key=lambda x: x[0],
+                                 reverse=True))
 
 
 @app.route('/urls/<int:url_id>/checks', methods=['POST'])
@@ -209,7 +212,8 @@ def check_urls(url_id):
 
         with connect.cursor() as curs:
             curs.execute('''
-            INSERT INTO url_checks (url_id, h1, title, description, status_code, created_at)
+            INSERT INTO url_checks (url_id, h1, title,
+            description, status_code, created_at)
             VALUES (%s, %s, %s, %s, %s, %s)
             ''', (url_id, h1, title, description, status, date.today(),))
 
