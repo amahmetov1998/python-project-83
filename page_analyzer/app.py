@@ -58,11 +58,11 @@ def main():
 
 @app.route('/urls', methods=['POST'])
 def add_url():
-    url_dict = request.form.to_dict()
-    errors = validate(url_dict)
+    url = request.form.to_dict()['url']
+    errors = validate(url)
 
     if not errors:
-        url = parse(url_dict['url'])
+        url = parse(url)
         try:
             connect = psycopg2.connect(DATABASE_URL)
             with connect.cursor() as curs:
@@ -123,7 +123,7 @@ def add_url():
     messages = get_flashed_messages(with_categories=True)
 
     if messages:
-        return render_template('main.html', url=url_dict['url'], messages=messages)
+        return render_template('main.html', url=url, messages=messages)
 
 
 @app.get('/urls/<int:url_id>')
