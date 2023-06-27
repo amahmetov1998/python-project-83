@@ -13,6 +13,20 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
 
 
+@app.route('/drop')
+def main_2():
+    try:
+        connect = psycopg2.connect(DATABASE_URL)
+        connect.autocommit = True
+        with connect.cursor() as curs:
+            curs.execute('''DROP TABLE IF EXISTS url_checks''')
+            curs.execute('''DROP TABLE IF EXISTS urls''')
+            return 'True'
+
+    except Exception as err:
+        return err
+
+
 @app.route('/')
 def main():
     try:
@@ -49,7 +63,33 @@ def add_url():
     url = url_dict['url']
 
     if not errors:
-        url = parse(url)
+        parsed_url = parse(url)
+
+        try:
+            connect = psycopg2.connect(DATABASE_URL)
+            with connect.cursor() as curs:
+                curs.execute('''
+                SELECT * FROM urls;
+                ''')
+                data = curs.fetchall()
+
+        except Exception as err:
+            return err
+
+        for elem in data:
+            if elem[1] == parsed_url:
+                try:
+                    with connect.cursor() as curs:
+                        curs.execute('''
+                        SELECT id FROM urls WHERE name=%s;
+                        ''', (parsed_url,))
+                        url_id = curs.fetchone()[0]
+
+                except Exception as err:
+                    return err
+
+                flash('Страница уже существует', 'warning')
+                return redirect(url_for('get_url', url_id=url_id))
 
     elif errors['url'] == EMPTY:
         flash('Некорректный URL', 'error')
@@ -62,34 +102,9 @@ def add_url():
         flash('URL превышает 255 символов', 'error')
 
     messages = get_flashed_messages(with_categories=True)
+
     if messages:
         return render_template('main.html', url=url, messages=messages)
-
-    try:
-        connect = psycopg2.connect(DATABASE_URL)
-        with connect.cursor() as curs:
-            curs.execute('''
-            SELECT * FROM urls;
-            ''')
-            data = curs.fetchall()
-
-    except Exception as err:
-        return err
-
-    for elem in data:
-        if elem[1] == url:
-            try:
-                with connect.cursor() as curs:
-                    curs.execute('''
-                    SELECT id FROM urls WHERE name=%s;
-                    ''', (url,))
-                    url_id = curs.fetchone()[0]
-
-            except Exception as err:
-                return err
-
-            flash('Страница уже существует', 'warning')
-            return redirect(url_for('get_url', url_id=url_id))
 
     try:
         connect = psycopg2.connect(DATABASE_URL)
