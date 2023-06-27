@@ -13,6 +13,12 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
 
 
+def check():
+    url = request.form.to_dict()['entered_url']
+    errors = validate(url)
+    return errors, url
+
+
 @app.route('/drop')
 def main_2():
     try:
@@ -58,8 +64,7 @@ def main():
 
 @app.route('/urls', methods=['POST'])
 def add_url():
-    url = request.form.to_dict()['entered_url']
-    errors = validate(url)
+    errors, url = check()
 
     if not errors:
         url = parse(url)
@@ -110,7 +115,7 @@ def add_url():
         flash('Страница успешно добавлена', 'success_add')
         return redirect(url_for('get_url', url_id=url_id))
 
-    if errors['url'] == EMPTY:
+    elif errors['url'] == EMPTY:
         flash('Некорректный URL', 'error')
         flash('URL обязателен', 'error')
 
