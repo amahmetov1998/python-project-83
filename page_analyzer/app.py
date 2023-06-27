@@ -37,14 +37,14 @@ def main():
 
     except Exception as err:
         return err
-    data = {'entered_url': ''}
+    data = {'url': ''}
 
     return render_template('main.html', data=data)
 
 
 @app.route('/urls', methods=['POST'])
 def add_url():
-    url = request.form.to_dict()['entered_url']
+    url = request.form.to_dict()['url']
     errors = validate(url)
     try:
         connect = psycopg2.connect(DATABASE_URL)
