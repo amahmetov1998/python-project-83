@@ -217,11 +217,11 @@ def check_urls(url_id):
             ''', (url_id, h1, title, description, status, date.today(),))
 
         flash('Страница успешно проверена', 'success_check')
+        return redirect(url_for('get_url', url_id=url_id))
 
-    except requests.exceptions.ConnectionError:
+    except requests.exceptions.RequestException:
         flash('Произошла ошибка при проверке', 'error')
-
-    return redirect(url_for('get_url', url_id=url_id))
+        return redirect(url_for('get_url', url_id=url_id))
 
 
 @app.errorhandler(404)
