@@ -74,7 +74,7 @@ def add_url():
 
     if messages:
         data = {'url': request.form.to_dict()['url']}
-        return render_template('main.html', data=data, messages=messages)
+        return render_template('main.html', data=data, messages=messages), 422
 
     for elem in data:
         if elem[1] == url:
