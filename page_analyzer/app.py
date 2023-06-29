@@ -218,7 +218,7 @@ def check_urls(url_id):
         flash('Страница успешно проверена', 'success_check')
         return redirect(url_for('get_url', url_id=url_id))
 
-    except ConnectionError:
+    except requests.exceptions.ConnectionError:
         flash('Произошла ошибка при проверке', 'error')
         return redirect(url_for('get_url', url_id=url_id))
 
