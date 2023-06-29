@@ -73,6 +73,7 @@ def add_url():
     messages = get_flashed_messages(with_categories=True)
 
     if messages:
+        data = {'url': request.form.to_dict()['url']}
         return render_template('main.html', data=data, messages=messages)
 
     for elem in data:
@@ -216,11 +217,11 @@ def check_urls(url_id):
             ''', (url_id, h1, title, description, status, date.today(),))
 
         flash('Страница успешно проверена', 'success_check')
-        return redirect(url_for('get_url', url_id=url_id))
 
     except requests.exceptions.ConnectionError:
         flash('Произошла ошибка при проверке', 'error')
-        return redirect(url_for('get_url', url_id=url_id))
+
+    return redirect(url_for('get_url', url_id=url_id))
 
 
 @app.errorhandler(404)
