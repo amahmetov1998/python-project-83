@@ -73,7 +73,7 @@ def add_url():
     messages = get_flashed_messages(with_categories=True)
 
     if messages:
-        return render_template('main.html', url=url, messages=messages)
+        return render_template('main.html', data=data, messages=messages)
 
     for elem in data:
         if elem[1] == url:
