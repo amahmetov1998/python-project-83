@@ -188,7 +188,9 @@ def check_urls(url_id):
         connect = psycopg2.connect(DATABASE_URL)
         connect.autocommit = True
 
-        check = check_url(name)
+        status = requests.get(name).status_code
+        if status != 200:
+            raise requests.RequestException
         html = requests.get(name).text
         soup = BeautifulSoup(html, 'lxml')
         h1 = soup.h1
@@ -214,7 +216,7 @@ def check_urls(url_id):
             INSERT INTO url_checks (url_id, h1, title,
             description, status_code, created_at)
             VALUES (%s, %s, %s, %s, %s, %s)
-            ''', (url_id, h1, title, description, check, date.today(),))
+            ''', (url_id, h1, title, description, status, date.today(),))
 
         flash('Страница успешно проверена', 'success_check')
 
