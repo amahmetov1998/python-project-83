@@ -8,6 +8,7 @@ from page_analyzer.parser import parse
 from datetime import date
 from page_analyzer.constants import INVALID, EMPTY, TOO_LONG
 from bs4 import BeautifulSoup
+from page_analyzer.check import check_url
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
@@ -42,7 +43,7 @@ def main():
     return render_template('main.html', data=data)
 
 
-@app.route('/urls', methods=['POST'])
+@app.post('/urls')
 def add_url():
     url = request.form.to_dict()['url']
     errors = validate(url)
@@ -112,7 +113,7 @@ def add_url():
     return redirect(url_for('get_url', url_id=url_id))
 
 
-@app.get('/urls/<int:url_id>')
+@app.route('/urls/<int:url_id>')
 def get_url(url_id):
     messages = get_flashed_messages(with_categories=True)
 
@@ -169,7 +170,7 @@ def get_urls():
                                  reverse=True))
 
 
-@app.route('/urls/<int:url_id>/checks', methods=['POST'])
+@app.post('/urls/<int:url_id>/checks')
 def check_urls(url_id):
     try:
         connect = psycopg2.connect(DATABASE_URL)
@@ -187,10 +188,9 @@ def check_urls(url_id):
         connect = psycopg2.connect(DATABASE_URL)
         connect.autocommit = True
 
-        status = requests.get(name).status_code
+        check = check_url(name)
         html = requests.get(name).text
         soup = BeautifulSoup(html, 'lxml')
-
         h1 = soup.h1
         if not h1:
             h1 = ''
@@ -214,16 +214,16 @@ def check_urls(url_id):
             INSERT INTO url_checks (url_id, h1, title,
             description, status_code, created_at)
             VALUES (%s, %s, %s, %s, %s, %s)
-            ''', (url_id, h1, title, description, status, date.today(),))
+            ''', (url_id, h1, title, description, check, date.today(),))
 
         flash('Страница успешно проверена', 'success_check')
-        return redirect(url_for('get_url', url_id=url_id))
 
-    except requests.exceptions.RequestException:
+    except requests.RequestException:
         flash('Произошла ошибка при проверке', 'error')
-        return redirect(url_for('get_url', url_id=url_id))
+
+    return redirect(url_for('get_url', url_id=url_id))
 
 
 @app.errorhandler(404)
 def not_found(error):
-    return render_template('errors.html', error=error)
+    return render_template('errors.html', error=error), 404
