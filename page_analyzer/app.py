@@ -8,7 +8,6 @@ from page_analyzer.parser import parse
 from datetime import date
 from page_analyzer.constants import INVALID, EMPTY, TOO_LONG
 from bs4 import BeautifulSoup
-from page_analyzer.check import check_url
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
