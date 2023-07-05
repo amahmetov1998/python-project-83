@@ -55,7 +55,7 @@ def add_data(url):
         ''', (url, date.today()))
 
 
-def get_different_data():
+def get_different():
     with connect.cursor() as curs:
         curs.execute('''
         SELECT id, name
@@ -67,7 +67,7 @@ def get_different_data():
     return unadded_data
 
 
-def get_similar_data():
+def get_similar():
     with connect.cursor() as curs:
         curs.execute('''
         SELECT url_checks.url_id, urls.name,
