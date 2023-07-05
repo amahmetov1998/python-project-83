@@ -86,6 +86,8 @@ def get_urls():
 @app.post('/urls/<int:url_id>/checks')
 def check_urls(url_id):
     response = make_request(url_id)
+    if not response:
+        return redirect(url_for('get_url', url_id=url_id))
 
     add_check(response)
 
