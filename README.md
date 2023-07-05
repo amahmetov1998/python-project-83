@@ -47,7 +47,7 @@ SECRET_KEY = '{your secret key}'
 
 ---
 
-### Usage
+## Usage
 Start the gunicorn Flask server:
 ```
 make start
