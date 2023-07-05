@@ -33,6 +33,7 @@ The project uses Poetry as a dependency manager. [Install](https://python-poetry
 The project uses PostgreSQL as a database. [Download](https://www.postgresql.org/download/) the ready-to-use package.
 
 ### Application
+Clone repository and install dependencies:
 ```bash
 >> git clone https://github.com/amahmetov/python-project-83.git
 make install
@@ -45,3 +46,19 @@ SECRET_KEY = '{your secret key}'
 Run commands from `database.sql` to create tables.
 
 ---
+
+### Usage
+Start the gunicorn Flask server:
+```
+make start
+```
+The server will be available at http://0.0.0.0:8000.
+It is possible to start it local in development mode:
+```
+make dev
+```
+The dev server will be available at http://127.0.0.1:5000.
+
+To add a new site, enter address into the form on the home page. The address will be validated and then added to the database.
+
+After that you can start checking it. A button appears on the page of a particular site, and clicking on it creates an entry in the validation table.
