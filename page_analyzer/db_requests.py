@@ -67,21 +67,6 @@ def get_different():
     return unadded_data
 
 
-def get_similar():
-    with connect.cursor() as curs:
-        curs.execute('''
-        SELECT url_checks.url_id, urls.name,
-        MAX(url_checks.created_at), url_checks.status_code
-        FROM url_checks
-        JOIN urls
-        ON urls.id = url_checks.url_id
-        GROUP BY url_checks.url_id, urls.name, url_checks.status_code
-        ORDER BY url_checks.url_id DESC;
-        ''')
-        added_data = curs.fetchall()
-    return added_data
-
-
 def get_data_by_id(url_id):
     with connect.cursor() as curs:
         curs.execute('''
@@ -113,3 +98,18 @@ def add_check(response):
         VALUES (%s, %s, %s, %s, %s, %s)
         ''', (response['url_id'], response['h1'], response['title'],
               response['description'], response['status'], date.today(),))
+
+
+def get_similar():
+    with connect.cursor() as curs:
+        curs.execute('''
+        SELECT url_checks.url_id, urls.name,
+        MAX(url_checks.created_at), url_checks.status_code
+        FROM url_checks
+        JOIN urls
+        ON urls.id = url_checks.url_id
+        GROUP BY url_checks.url_id, urls.name, url_checks.status_code
+        ORDER BY url_checks.url_id DESC;
+        ''')
+        added_data = curs.fetchall()
+    return added_data
