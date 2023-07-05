@@ -14,4 +14,5 @@ It uses the basic principles of building modern sites on the MVC architecture: w
 
 ## Demo:
 The demo version of the application: https://python-project-83-production-68b1.up.railway.app/
+
 <img src="https://sun21-1.userapi.com/impg/T1FClBJK87OdmiYJL4qAMU41cQo3uexvJEF7hg/V13taWR8Vyw.jpg?size=1280x613&quality=96&sign=08f7c567121eb25b90cfdcefc8b0e099&type=album" alt="logo" width="auto" height="auto" />
