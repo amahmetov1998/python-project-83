@@ -8,7 +8,7 @@
 </div>
 
 ## About
-The page analyzer is an application based on the Flask framework. 
+The Page Analyzer is an application based on the Flask framework that analyzes the web-pages for SEO suitability.
 It uses the basic principles of building modern sites on the MVC architecture: working with routing, forum handlers and templating, interaction with the database.
 
 ## Demo
@@ -53,6 +53,7 @@ Start the gunicorn Flask server:
 make start
 ```
 The server will be available at http://0.0.0.0:8000.
+
 It is possible to start it local in development mode:
 ```
 make dev
@@ -60,5 +61,3 @@ make dev
 The dev server will be available at http://127.0.0.1:5000.
 
 To add a new site, enter address into the form on the home page. The address will be validated and then added to the database.
-
-After that you can start checking it. A button appears on the page of a particular site, and clicking on it creates an entry in the validation table.
