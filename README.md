@@ -5,6 +5,7 @@
 
 [![Actions Status](https://github.com/amahmetov1998/python-project-83/workflows/hexlet-check/badge.svg)](https://github.com/amahmetov1998/python-project-83/actions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/8e3581385c30fa25fc6e/maintainability)](https://codeclimate.com/github/amahmetov1998/python-project-83/maintainability)
+[![run test and linter](https://github.com/amahmetov1998/python-project-83/actions/workflows/main.yml/badge.svg)](https://github.com/amahmetov1998/python-project-83/actions/workflows/main.yml)
 </div>
 
 ## About
