@@ -17,3 +17,30 @@ The demo version of the application: https://python-project-83-production-68b1.u
 <img src="https://sun21-1.userapi.com/impg/T1FClBJK87OdmiYJL4qAMU41cQo3uexvJEF7hg/V13taWR8Vyw.jpg?size=1280x613&quality=96&sign=08f7c567121eb25b90cfdcefc8b0e099&type=album" width="auto" height="auto" />
 
 ## Installation
+
+#### Python
+Make sure you have the Python version 3.8 or higher:
+```
+>> python --version
+Python 3.8+
+```
+
+#### Poetry
+[Install] Poetry.
+
+#### PostgreSQL
+The project uses PostgreSQL as a database. [Download] the ready-to-use package.
+
+#### Application
+```
+>> git clone https://github.com/amahmetov/python-project-83.git
+make install
+```
+Create .env file in the root and add the next variables:
+```
+DATABASE_URL = postgresql://{provider}://{user}:{password}@{host}:{port}/{db}
+SECRET_KEY = '{your secret key}'
+```
+Run commands from `database.sql` to create tables.
+
+---
