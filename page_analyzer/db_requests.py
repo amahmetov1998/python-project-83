@@ -34,7 +34,7 @@ def get_added_data():
         curs.execute('''
         SELECT * FROM urls;
         ''')
-    data = curs.fetchall()
+        data = curs.fetchall()
     return data
 
 
