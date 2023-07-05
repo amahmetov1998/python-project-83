@@ -38,12 +38,11 @@ Clone repository and install dependencies:
 git clone https://github.com/amahmetov/python-project-83.git
 make install
 ```
-Create .env file in the root and add the next variables:
+Create `.env` file in the root and add the next variables:
 ```
 DATABASE_URL = postgresql://{provider}://{user}:{password}@{host}:{port}/{db}
 SECRET_KEY = '{your secret key}'
 ```
-Run commands from `database.sql` to create tables.
 
 ---
 
