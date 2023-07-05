@@ -1,6 +1,5 @@
 from flask import Flask, render_template, \
     request, redirect, flash, get_flashed_messages, url_for
-import psycopg2
 import os
 from page_analyzer.urls import validate, parse, make_request
 from page_analyzer.db_requests import create_tables, \
