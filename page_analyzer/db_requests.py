@@ -63,8 +63,8 @@ def get_different_data():
         WHERE NOT EXISTS (SELECT urls.id
                           FROM url_checks
                           WHERE urls.id = url_checks.url_id);''')
-        data = curs.fetchall()
-    return data
+        unadded_data = curs.fetchall()
+    return unadded_data
 
 
 def get_similar_data():
@@ -78,8 +78,8 @@ def get_similar_data():
         GROUP BY url_checks.url_id, urls.name, url_checks.status_code
         ORDER BY url_checks.url_id DESC;
         ''')
-        data = curs.fetchall()
-    return data
+        added_data = curs.fetchall()
+    return added_data
 
 
 def get_data_by_id(url_id):
