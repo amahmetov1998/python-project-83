@@ -9,8 +9,9 @@
 
 ## About
 The page analyzer is an application based on the Flask framework. 
-It uses the basic principles of building modern sites on the MVC architecture: working with routing, forum handlers and a template engine, interaction with the database.
+It uses the basic principles of building modern sites on the MVC architecture: working with routing, forum handlers and templating, interaction with the database.
 
 
-### Web:
-https://python-project-83-production-68b1.up.railway.app/
+## Demo:
+The demo version of the application: https://python-project-83-production-68b1.up.railway.app/
+<img src="https://sun9-46.userapi.com/impg/exK1Y6d4v8WOvW24WX9JqqjseC9JuVcPfF8y7Q/6ZLsN-UTPBg.jpg?size=512x512&quality=96&sign=b0b04f76053f9d6befa50f9643ea7f24&type=album" alt="logo" width="150" height="auto" />
