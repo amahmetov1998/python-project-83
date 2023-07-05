@@ -18,20 +18,20 @@ The demo version of the application: https://python-project-83-production-68b1.u
 
 ## Installation
 
-#### Python
+### Python
 Make sure you have the Python version 3.8 or higher:
 ```
 >> python --version
 Python 3.8+
 ```
 
-#### Poetry
+### Poetry
 [Install] Poetry.
 
-#### PostgreSQL
+### PostgreSQL
 The project uses PostgreSQL as a database. [Download] the ready-to-use package.
 
-#### Application
+### Application
 ```
 >> git clone https://github.com/amahmetov/python-project-83.git
 make install
