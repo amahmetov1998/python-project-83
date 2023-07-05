@@ -1,44 +1,23 @@
 from flask import Flask, render_template, \
     request, redirect, flash, get_flashed_messages, url_for
 import psycopg2
-import requests
-from page_analyzer.config import DATABASE_URL, SECRET_KEY
-from page_analyzer.validator import validate
-from page_analyzer.parser import parse
-from datetime import date
-from page_analyzer.constants import INVALID, EMPTY, TOO_LONG
-from bs4 import BeautifulSoup
+import os
+from page_analyzer.urls import validate, parse, make_request
+from page_analyzer.db_requests import create_tables, \
+    get_added_data, get_id_by_url, add_data, get_different_data, \
+    get_similar_data, get_data_by_id, add_check
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = SECRET_KEY
+DATABASE_URL = os.getenv('DATABASE_URL')
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 
 @app.route('/')
 def main():
-    try:
-        connect = psycopg2.connect(DATABASE_URL)
-        connect.autocommit = True
-        with connect.cursor() as curs:
-            curs.execute(
-                '''CREATE TABLE IF NOT EXISTS urls (
-                id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-                name VARCHAR(255),
-                created_at DATE NOT NULL);''')
 
-            curs.execute(
-                '''CREATE TABLE IF NOT EXISTS url_checks (
-                id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-                url_id bigint REFERENCES urls (id),
-                status_code INTEGER,
-                h1 VARCHAR(255),
-                title VARCHAR(255),
-                description VARCHAR(255),
-                created_at DATE);''')
+    create_tables()
 
-    except Exception as err:
-        return err
     data = {'url': ''}
-
     return render_template('main.html', data=data)
 
 
@@ -46,28 +25,18 @@ def main():
 def add_url():
     url = request.form.to_dict()['url']
     errors = validate(url)
-    try:
-        connect = psycopg2.connect(DATABASE_URL)
-        with connect.cursor() as curs:
-            curs.execute('''
-            SELECT * FROM urls;
-            ''')
-            data = curs.fetchall()
-
-    except Exception as err:
-        return err
 
     if not errors:
         url = parse(url)
 
-    elif errors['url'] == EMPTY:
+    elif errors['url'] == 'empty':
         flash('Некорректный URL', 'error')
         flash('URL обязателен', 'error')
 
-    elif errors['url'] == INVALID:
+    elif errors['url'] == 'invalid':
         flash('Некорректный URL', 'error')
 
-    elif errors['url'] == TOO_LONG:
+    elif errors['url'] == 'too_long':
         flash('URL превышает 255 символов', 'error')
 
     messages = get_flashed_messages(with_categories=True)
@@ -76,37 +45,19 @@ def add_url():
         data = {'url': request.form.to_dict()['url']}
         return render_template('main.html', data=data, messages=messages), 422
 
+    data = get_added_data()
+
     for elem in data:
         if elem[1] == url:
-            try:
-                with connect.cursor() as curs:
-                    curs.execute('''
-                    SELECT id FROM urls WHERE name=%s;
-                    ''', (url,))
-                    url_id = curs.fetchone()[0]
-            except Exception as err:
-                return err
+
+            url_id = get_id_by_url(url)
 
             flash('Страница уже существует', 'warning')
             return redirect(url_for('get_url', url_id=url_id))
 
-    try:
-        connect = psycopg2.connect(DATABASE_URL)
-        connect.autocommit = True
-        with connect.cursor() as curs:
+    add_data(url)
 
-            curs.execute('''
-            INSERT INTO urls (name, created_at)
-            VALUES (%s, %s);
-            ''', (url, date.today()))
-
-            curs.execute('''
-            SELECT id FROM urls WHERE name=%s
-            ''', (url,))
-            url_id = curs.fetchone()[0]
-
-    except Exception as err:
-        return err
+    url_id = get_id_by_url(url)
 
     flash('Страница успешно добавлена', 'success_add')
     return redirect(url_for('get_url', url_id=url_id))
@@ -116,115 +67,47 @@ def add_url():
 def get_url(url_id):
     messages = get_flashed_messages(with_categories=True)
 
-    try:
-        connect = psycopg2.connect(DATABASE_URL)
-        with connect.cursor() as curs:
-            curs.execute('''
-            SELECT * FROM urls WHERE id=%s
-            ''', (url_id,))
-            data = curs.fetchall()
-
-            curs.execute('''
-            SELECT * FROM url_checks WHERE url_id=%s ORDER BY id DESC
-            ''', (url_id,))
-            info = curs.fetchall()
-
-    except Exception as err:
-        return err
+    data, info = get_data_by_id(url_id)
 
     return render_template('url.html', data=data, info=info, messages=messages)
 
 
 @app.get('/urls')
 def get_urls():
-    try:
-        connect = psycopg2.connect(DATABASE_URL)
-        with connect.cursor() as curs:
-            curs.execute('''
-            SELECT id, name
-            FROM urls
-            WHERE NOT EXISTS (SELECT urls.id
-                              FROM url_checks
-                              WHERE urls.id = url_checks.url_id);''')
-            not_added = curs.fetchall()
-
-        with connect.cursor() as curs:
-            curs.execute('''
-            SELECT url_checks.url_id, urls.name,
-            MAX(url_checks.created_at), url_checks.status_code
-            FROM url_checks
-            JOIN urls
-            ON urls.id = url_checks.url_id
-            GROUP BY url_checks.url_id, urls.name, url_checks.status_code
-            ORDER BY url_checks.url_id DESC;
-            ''')
-            added = curs.fetchall()
-        data = added + not_added
-
-    except Exception as err:
-        return err
+    unadded_data = get_different_data()
+    added_data = get_similar_data()
+    data = unadded_data + added_data
 
     return render_template(
-        'urls.html', data=sorted(data, key=lambda x: x[0],
+        'urls.html', data=sorted(data,
+                                 key=lambda x: x[0],
                                  reverse=True))
 
 
 @app.post('/urls/<int:url_id>/checks')
 def check_urls(url_id):
-    try:
-        connect = psycopg2.connect(DATABASE_URL)
-        connect.autocommit = True
-        with connect.cursor() as curs:
-            curs.execute('''
-            SELECT name FROM urls WHERE id = %s
-            ''', (url_id,))
-            name = curs.fetchall()[0][0]
+    response = make_request(url_id)
 
-    except Exception as err:
-        return err
+    add_check(response)
 
-    try:
-        connect = psycopg2.connect(DATABASE_URL)
-        connect.autocommit = True
-
-        status = requests.get(name).status_code
-        if status != 200:
-            raise requests.RequestException
-        html = requests.get(name).text
-        soup = BeautifulSoup(html, 'lxml')
-        h1 = soup.h1
-        if not h1:
-            h1 = ''
-        else:
-            h1 = h1.string
-
-        title = soup.title
-        if not title:
-            title = ''
-        else:
-            title = title.string
-
-        tag = soup.find('meta', attrs={'name': 'description'})
-        if not tag:
-            description = ''
-        else:
-            description = tag['content']
-
-        with connect.cursor() as curs:
-            curs.execute('''
-            INSERT INTO url_checks (url_id, h1, title,
-            description, status_code, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            ''', (url_id, h1, title, description, status, date.today(),))
-
-        flash('Страница успешно проверена', 'success_check')
-
-    except requests.RequestException:
-        flash('Произошла ошибка при проверке', 'error')
-
+    flash('Страница успешно проверена', 'success_check')
     return redirect(url_for('get_url', url_id=url_id))
 
 
 @app.errorhandler(404)
 def not_found(error):
     return render_template('errors.html', error=error), 404
+
+
+@app.route('/drop')
+def main_2():
+    try:
+        connect = psycopg2.connect(DATABASE_URL)
+        connect.autocommit = True
+        with connect.cursor() as curs:
+            curs.execute('''DROP TABLE IF EXISTS url_checks''')
+            curs.execute('''DROP TABLE IF EXISTS urls''')
+        return 'True'
+
+    except Exception as err:
+        return err
