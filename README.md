@@ -26,7 +26,6 @@ Make sure you have the Python version 3.8 or higher:
 python --version
 Python 3.8+
 ```
-
 ### Poetry
 The project uses Poetry as a dependency manager. [Install](https://python-poetry.org/docs/#installation) Poetry.
 
