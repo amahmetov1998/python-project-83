@@ -97,17 +97,3 @@ def check_urls(url_id):
 @app.errorhandler(404)
 def not_found(error):
     return render_template('errors.html', error=error), 404
-
-
-@app.route('/drop')
-def main_2():
-    try:
-        connect = psycopg2.connect(DATABASE_URL)
-        connect.autocommit = True
-        with connect.cursor() as curs:
-            curs.execute('''DROP TABLE IF EXISTS url_checks''')
-            curs.execute('''DROP TABLE IF EXISTS urls''')
-        return 'True'
-
-    except Exception as err:
-        return err

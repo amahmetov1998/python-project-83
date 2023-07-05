@@ -6,12 +6,12 @@ from datetime import date
 load_dotenv()
 
 DATABASE_URL = os.getenv('DATABASE_URL')
+connect = psycopg2.connect(DATABASE_URL)
+connect.autocommit = True
 
 
 def create_tables():
     try:
-        connect = psycopg2.connect(DATABASE_URL)
-        connect.autocommit = True
         with connect.cursor() as curs:
             curs.execute(
                 '''CREATE TABLE IF NOT EXISTS urls (
@@ -35,7 +35,6 @@ def create_tables():
 
 def get_added_data():
     try:
-        connect = psycopg2.connect(DATABASE_URL)
         with connect.cursor() as curs:
             curs.execute('''
             SELECT * FROM urls;
@@ -49,7 +48,6 @@ def get_added_data():
 
 def get_id_by_url(url):
     try:
-        connect = psycopg2.connect(DATABASE_URL)
         with connect.cursor() as curs:
             curs.execute('''
             SELECT id FROM urls WHERE name=%s;
@@ -62,8 +60,6 @@ def get_id_by_url(url):
 
 def add_data(url):
     try:
-        connect = psycopg2.connect(DATABASE_URL)
-        connect.autocommit = True
         with connect.cursor() as curs:
 
             curs.execute('''
@@ -76,7 +72,6 @@ def add_data(url):
 
 def get_different_data():
     try:
-        connect = psycopg2.connect(DATABASE_URL)
         with connect.cursor() as curs:
             curs.execute('''
             SELECT id, name
@@ -92,8 +87,6 @@ def get_different_data():
 
 def get_similar_data():
     try:
-        connect = psycopg2.connect(DATABASE_URL)
-
         with connect.cursor() as curs:
             curs.execute('''
             SELECT url_checks.url_id, urls.name,
@@ -112,7 +105,6 @@ def get_similar_data():
 
 def get_data_by_id(url_id):
     try:
-        connect = psycopg2.connect(DATABASE_URL)
         with connect.cursor() as curs:
             curs.execute('''
             SELECT * FROM urls WHERE id=%s
@@ -131,8 +123,6 @@ def get_data_by_id(url_id):
 
 def get_url_by_id(url_id):
     try:
-        connect = psycopg2.connect(DATABASE_URL)
-        connect.autocommit = True
         with connect.cursor() as curs:
             curs.execute('''
             SELECT name FROM urls WHERE id = %s
@@ -146,8 +136,6 @@ def get_url_by_id(url_id):
 
 def add_check(response):
     try:
-        connect = psycopg2.connect(DATABASE_URL)
-        connect.autocommit = True
         with connect.cursor() as curs:
             curs.execute('''
             INSERT INTO url_checks (url_id, h1, title,
