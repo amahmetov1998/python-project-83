@@ -5,11 +5,12 @@
 
 [![Actions Status](https://github.com/amahmetov1998/python-project-83/workflows/hexlet-check/badge.svg)](https://github.com/amahmetov1998/python-project-83/actions)
 [![Maintainability](https://api.codeclimate.com/v1/badges/8e3581385c30fa25fc6e/maintainability)](https://codeclimate.com/github/amahmetov1998/python-project-83/maintainability)
-
-
-
-
 </div>
+
+## About
+The page analyzer is an application based on the Flask framework. 
+It uses the basic principles of building modern sites on the MVC architecture: working with routing, forum handlers and a template engine, interaction with the database.
+
 
 ### Web:
 https://python-project-83-production-68b1.up.railway.app/
