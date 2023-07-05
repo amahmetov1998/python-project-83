@@ -20,19 +20,19 @@ The demo version of the application: https://python-project-83-production-68b1.u
 
 ### Python
 Make sure you have the Python version 3.8 or higher:
-```
+```bash
 >> python --version
 Python 3.8+
 ```
 
 ### Poetry
-[Install] Poetry.
+[Install](https://python-poetry.org/docs/#installation) Poetry.
 
 ### PostgreSQL
-The project uses PostgreSQL as a database. [Download] the ready-to-use package.
+The project uses PostgreSQL as a database. [Download](https://www.postgresql.org/download/) the ready-to-use package.
 
 ### Application
-```
+```bash
 >> git clone https://github.com/amahmetov/python-project-83.git
 make install
 ```
