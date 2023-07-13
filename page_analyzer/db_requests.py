@@ -1,6 +1,9 @@
 import psycopg2
 import os
+from dotenv import load_dotenv
 from datetime import date
+
+load_dotenv()
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 connect = psycopg2.connect(DATABASE_URL)

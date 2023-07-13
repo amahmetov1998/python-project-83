@@ -2,12 +2,10 @@ from flask import Flask, render_template, \
     request, redirect, flash, get_flashed_messages, url_for
 import os
 from page_analyzer.urls import validate, parse, make_request
-from dotenv import load_dotenv
 from page_analyzer.db_requests import create_tables, \
     get_added_data, get_id_by_url, add_data, get_different, \
     get_similar, get_data_by_id, add_check
 
-load_dotenv()
 
 app = Flask(__name__)
 DATABASE_URL = os.getenv('DATABASE_URL')
